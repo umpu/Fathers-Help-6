@@ -8,14 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    private var count = 7
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        HStack {
+            ForEach(0..<count) { _ in
+                RoundedRectangle(cornerRadius: 10)
+                    .aspectRatio(1.0, contentMode: .fit)
+                    .foregroundStyle(.blue)
+            }
         }
-        .padding()
+        .ignoresSafeArea(edges: .horizontal)
     }
 }
 
