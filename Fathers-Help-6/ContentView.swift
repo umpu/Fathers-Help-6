@@ -7,46 +7,45 @@
 
 import SwiftUI
 
-struct CustomLayout: Layout {
+struct DiagonalLayout: Layout {
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         proposal.replacingUnspecifiedDimensions()
     }
     
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let width = proposal.replacingUnspecifiedDimensions().width
-        let height = proposal.replacingUnspecifiedDimensions().height
-        let subviewsCount = CGFloat(subviews.count)
-        let viewHeight = height / subviewsCount
-        let viewSize = CGSize(width: viewHeight, height: viewHeight)
-        var positionX = bounds.minX
-        var positionY = bounds.maxY
+        let count = subviews.count
+        let height = bounds.height / CGFloat(count)
+        let wStep = (bounds.width - height) / CGFloat(count - 1)
         
-        subviews.forEach { subview in
-            let position = CGPoint(x: positionX, y: positionY)
-            subview.place(at: position, anchor: .bottomLeading, proposal: ProposedViewSize(viewSize))
-            positionX += (width - viewHeight) / (subviewsCount - 1)
-            positionY -= viewHeight
+        for (index, view) in subviews.enumerated() {
+            view.place(
+                at: .init(
+                    x: CGFloat(index) * wStep + bounds.minX,
+                    y: (bounds.maxY - height) - (height * CGFloat(index))),
+                proposal: .init(
+                    width: height,
+                    height: height)
+            )
         }
     }
 }
 
 struct ContentView: View {
-    private var count = 7
-    @State var customMode = true
+    @State private var horizontal = true
     
     var body: some View {
-        let layout = customMode ? AnyLayout(HStackLayout()) : AnyLayout(CustomLayout())
+        let layout = horizontal ? AnyLayout(HStackLayout()) : AnyLayout(DiagonalLayout())
         
         layout {
-            ForEach(0..<count) { _ in
+            ForEach(0..<7) { _ in
                 RoundedRectangle(cornerRadius: 10)
-                    .aspectRatio(1.0, contentMode: .fit)
+                    .aspectRatio(1, contentMode: .fit)
                     .foregroundStyle(.blue)
             }
         }
         .onTapGesture {
             withAnimation() {
-                customMode.toggle()
+                horizontal.toggle()
             }
         }
     }
